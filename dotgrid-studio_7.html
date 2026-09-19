@@ -1,0 +1,1162 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dot Grid Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;450;500;600&display=swap">
+<style>
+  :root{
+    --chrome:#D7D7D4;
+    --panel:#FFFFFF;
+    --sunk:#F2F2EF;
+    --raise:#F2F2EF;
+    --line:#E4E4DF;
+    --hair:#EDEDE8;
+    --text:#141413;
+    --dim:#6C6C66;
+    --faint:#9E9E96;
+    --accent:#DFF95C;
+    --focus:#141413;
+    --stagebg:#DBDBD7;
+    --r:18px;
+    --sans:'IBM Plex Sans',system-ui,-apple-system,'Segoe UI',sans-serif;
+    --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;background:var(--chrome);color:var(--text);
+    font-family:var(--sans);font-size:13px;line-height:1.5;
+    display:flex;flex-direction:column;overflow:hidden;padding:12px;gap:12px;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::-webkit-scrollbar{width:10px}
+  ::-webkit-scrollbar-thumb{background:#D5D5CF;border-radius:10px;border:3px solid var(--panel)}
+  ::-webkit-scrollbar-thumb:hover{background:#C2C2BB}
+
+  /* ---------- top ---------- */
+  .top{
+    flex:0 0 auto;display:flex;align-items:center;gap:8px;
+    padding:0 6px 0 10px;height:38px;
+  }
+  .mark{display:flex;align-items:center;gap:10px;margin-right:auto;min-width:0}
+  .mark b{font-weight:600;font-size:14px;letter-spacing:-.012em}
+  .mark i{
+    font-style:normal;font-family:var(--mono);font-size:9.5px;color:var(--faint);
+    letter-spacing:.11em;text-transform:uppercase;white-space:nowrap;
+  }
+
+  .btn{
+    font:500 12.5px/1 var(--sans);color:var(--text);
+    background:var(--panel);border:none;border-radius:999px;
+    padding:10px 15px;cursor:pointer;transition:background .13s,color .13s,box-shadow .13s;
+    display:inline-flex;align-items:center;gap:7px;
+  }
+  .btn:hover{background:#F7F7F4;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+  .btn.quiet{background:transparent;color:var(--dim)}
+  .btn.quiet:hover{background:var(--panel);color:var(--text)}
+  .btn.solid{background:var(--text);color:#fff}
+  .btn.solid:hover{background:#000;color:#fff}
+  .btn:focus-visible,select:focus-visible,input:focus-visible,textarea:focus-visible{
+    outline:2px solid var(--focus);outline-offset:2px}
+  kbd{
+    font-family:var(--mono);font-size:9px;padding:3px 6px;border-radius:999px;
+    background:rgba(0,0,0,.06);opacity:.7;
+  }
+  .btn.solid kbd{background:rgba(255,255,255,.18);opacity:.8}
+
+  select{
+    font:500 12.5px/1 var(--sans);color:var(--text);appearance:none;
+    background:var(--sunk);border:none;border-radius:11px;
+    padding:11px 30px 11px 13px;cursor:pointer;width:100%;
+    background-image:linear-gradient(45deg,transparent 50%,var(--dim) 50%),linear-gradient(135deg,var(--dim) 50%,transparent 50%);
+    background-position:calc(100% - 16px) 50%,calc(100% - 11px) 50%;
+    background-size:5px 5px,5px 5px;background-repeat:no-repeat;
+  }
+  select:hover{background-color:#EAEAE6}
+  select.compact{width:auto;background-color:var(--panel);border-radius:999px;padding:10px 30px 10px 14px}
+  select.compact:hover{background-color:#F7F7F4}
+
+  /* ---------- shell ---------- */
+  .shell{flex:1;min-height:0;display:flex;gap:12px}
+  aside{
+    flex:0 0 296px;background:var(--panel);border-radius:var(--r);
+    overflow-y:auto;padding:4px 0 16px;
+  }
+  .grp{padding:18px 18px 20px;border-bottom:1px solid var(--hair)}
+  .grp:last-child{border-bottom:none}
+  .grp > h2{
+    margin:0 0 15px;font-family:var(--mono);font-size:9.5px;font-weight:500;
+    letter-spacing:.15em;text-transform:uppercase;color:var(--faint);
+  }
+  .f{margin-bottom:17px}
+  .f:last-child{margin-bottom:0}
+  .f .hd{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:9px}
+  .f label{font-size:12.5px;color:var(--dim);font-weight:500}
+  .f .v{
+    font-family:var(--mono);font-size:10.5px;color:var(--text);font-variant-numeric:tabular-nums;
+    background:var(--sunk);border-radius:999px;padding:3px 8px;
+  }
+
+  input[type=text]{
+    width:100%;font-family:var(--mono);font-size:13px;letter-spacing:.1em;
+    color:var(--text);background:var(--sunk);border:none;
+    border-radius:11px;padding:12px 13px;text-transform:uppercase;
+  }
+  input[type=text]::placeholder{color:var(--faint)}
+  .tip{font-size:11.5px;color:var(--faint);margin:9px 0 0;line-height:1.45}
+  .lnk{
+    font:500 11.5px/1 var(--sans);color:var(--text);background:var(--accent);
+    border:none;border-radius:999px;padding:4px 9px;cursor:pointer;margin-left:2px;
+  }
+  .lnk:hover{filter:brightness(.94)}
+
+  input[type=range]{
+    -webkit-appearance:none;appearance:none;width:100%;height:16px;background:transparent;margin:0;cursor:pointer;display:block;
+  }
+  input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:4px;background:var(--sunk)}
+  input[type=range]::-moz-range-track{height:4px;border-radius:4px;background:var(--sunk)}
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;width:14px;height:14px;border-radius:50%;
+    background:var(--text);margin-top:-5px;border:none;
+    box-shadow:0 1px 3px rgba(0,0,0,.25);
+  }
+  input[type=range]::-moz-range-thumb{
+    width:14px;height:14px;border-radius:50%;background:var(--text);
+    border:none;box-shadow:0 1px 3px rgba(0,0,0,.25);
+  }
+
+  .seg{display:flex;background:var(--sunk);border-radius:999px;padding:3px;gap:2px}
+  .seg button{
+    flex:1;font:500 11.5px/1 var(--sans);padding:8px 0;border:none;border-radius:999px;
+    background:transparent;color:var(--dim);cursor:pointer;transition:background .13s,color .13s;
+  }
+  .seg button:hover{color:var(--text)}
+  .seg button[aria-pressed="true"]{background:var(--panel);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.1)}
+
+  .chips{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+  .chip{
+    display:flex;align-items:center;justify-content:center;gap:6px;
+    background:var(--sunk);border:none;border-radius:999px;
+    padding:10px 0;cursor:pointer;color:var(--dim);font:500 11.5px/1 var(--sans);
+    transition:background .13s,color .13s;
+  }
+  .chip:hover{background:#EAEAE6;color:var(--text)}
+  .chip[aria-pressed="true"]{background:var(--accent);color:var(--text)}
+  .chip svg{display:block;flex:0 0 auto}
+
+  .swatches{display:flex;gap:8px}
+  .sw{flex:1;min-width:0}
+  .sw span{display:block;font-size:11px;color:var(--dim);margin-bottom:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  input[type=color]{
+    width:100%;height:34px;padding:0;border:none;
+    border-radius:11px;background:var(--sunk);cursor:pointer;
+  }
+  input[type=color]::-webkit-color-swatch-wrapper{padding:5px}
+  input[type=color]::-webkit-color-swatch{border:none;border-radius:7px}
+
+  /* ---------- stage ---------- */
+  main{
+    flex:1;min-width:0;display:flex;flex-direction:column;
+    background:var(--panel);border-radius:var(--r);overflow:hidden;
+  }
+  .stage{
+    flex:1;min-height:0;display:flex;align-items:center;justify-content:center;
+    padding:28px;position:relative;background:var(--stagebg);
+    margin:10px 10px 0;border-radius:12px;
+  }
+  .board{
+    position:relative;max-width:100%;max-height:100%;border-radius:6px;overflow:hidden;
+    box-shadow:0 0 0 1px rgba(0,0,0,.07),0 18px 40px rgba(0,0,0,.14);
+  }
+  .board.frozen{box-shadow:0 0 0 2px var(--text),0 18px 40px rgba(0,0,0,.18)}
+  canvas{display:block;touch-action:none;cursor:crosshair}
+
+  .capture[hidden]{display:none}
+  .capture{
+    position:absolute;left:50%;bottom:20px;transform:translateX(-50%);
+    display:flex;align-items:center;gap:6px;flex-wrap:wrap;justify-content:center;
+    background:var(--panel);border:none;border-radius:999px;
+    padding:7px 7px 7px 16px;box-shadow:0 10px 30px rgba(0,0,0,.18);
+    max-width:calc(100% - 40px);
+  }
+  .capture .tag{
+    font-family:var(--mono);font-size:9.5px;letter-spacing:.11em;text-transform:uppercase;
+    color:var(--faint);margin-right:6px;white-space:nowrap;
+  }
+  .status{
+    flex:0 0 auto;display:flex;align-items:center;gap:14px;
+    padding:0 18px;height:38px;background:var(--panel);
+    font-family:var(--mono);font-size:10px;color:var(--faint);letter-spacing:.06em;
+  }
+  .status .dot{width:3px;height:3px;border-radius:50%;background:#D3D3CD}
+
+  /* ---------- dialog ---------- */
+  dialog{
+    width:min(880px,93vw);max-height:86vh;padding:0;border:none;
+    border-radius:var(--r);background:var(--panel);color:var(--text);
+    box-shadow:0 30px 80px rgba(0,0,0,.28);
+  }
+  dialog::backdrop{background:rgba(30,30,28,.42)}
+  .dh{display:flex;align-items:center;gap:14px;padding:14px 16px;border-bottom:1px solid var(--hair)}
+  .dh b{font-size:14px;font-weight:600;margin-right:auto}
+  .dh .seg{width:250px}
+  .dn{margin:0;padding:13px 18px;font-size:12.5px;color:var(--dim);border-bottom:1px solid var(--hair)}
+  #codeOut{
+    display:block;width:100%;height:min(45vh,372px);resize:vertical;
+    font-family:var(--mono);font-size:11.5px;line-height:1.6;
+    color:var(--text);background:var(--sunk);border:none;
+    padding:16px 18px;white-space:pre;overflow:auto;
+  }
+  #codeOut:focus{outline:none}
+  .df{display:flex;align-items:center;gap:8px;padding:12px 14px}
+  .df .tag{font-family:var(--mono);font-size:10px;color:var(--faint);letter-spacing:.07em;margin-right:auto;padding-left:6px}
+  .df .btn{background:var(--sunk)}
+  .df .btn.solid{background:var(--text)}
+
+  @media (max-width:860px){
+    .shell{flex-direction:column-reverse}
+    aside{flex:0 0 auto;max-height:46vh}
+    .mark i{display:none}
+  }
+</style>
+</head>
+<body>
+
+<div class="top">
+  <div class="mark"><b>Dot Grid Studio</b><i>Great Head</i></div>
+  <select id="exportScale" class="compact" aria-label="Escala PNG">
+    <option value="1">1×</option><option value="2" selected>2×</option><option value="4">4×</option>
+  </select>
+  <button class="btn quiet" id="export">PNG</button>
+  <button class="btn quiet" id="codeBtn">Código</button>
+  <button class="btn solid" id="freeze">Congelar <kbd>espacio</kbd></button>
+</div>
+
+<div class="shell">
+  <aside>
+
+    <div class="grp">
+      <h2>Texto</h2>
+      <div class="f"><input type="text" id="text" value="GREAT / HEAD" placeholder="GREAT / HEAD"></div>
+      <p class="tip">Separá líneas con “/”</p>
+    </div>
+
+    <div class="grp">
+      <h2>Letra</h2>
+      <div class="f">
+        <div class="hd"><label for="face">Matriz</label></div>
+        <select id="face">
+          <option value="std" selected>Estándar · 5 × 7</option>
+          <option value="wide">Amplia · 7 × 9</option>
+          <option value="tall">Alta · 5 × 9</option>
+          <option value="serif">Serif · 10 × 11</option>
+          <option value="logo">Logotipo · proporcional</option>
+        </select>
+        <p class="tip"><span id="faceTip"></span> <button class="lnk" type="button" id="facePreset">aplicar</button></p>
+      </div>
+      <div class="f">
+        <div class="hd"><label>Densidad del trazo</label><span class="v" id="densityV">2</span></div>
+        <div class="seg" id="densitySeg">
+          <button type="button" data-v="1">1</button>
+          <button type="button" data-v="2" aria-pressed="true">2</button>
+          <button type="button" data-v="3">3</button>
+          <button type="button" data-v="4">4</button>
+        </div>
+      </div>
+      <div class="f">
+        <div class="hd"><label for="weight">Peso</label><span class="v" id="weightV">0</span></div>
+        <input type="range" id="weight" min="-1" max="2" step="1" value="0">
+        <p class="tip">Negativo adelgaza, positivo engorda el trazo de la matriz</p>
+      </div>
+      <div class="f">
+        <div class="hd"><label for="tracking">Interletra</label><span class="v" id="trackingV">2</span></div>
+        <input type="range" id="tracking" min="-3" max="6" step="1" value="2">
+      </div>
+      <div class="f">
+        <div class="hd"><label for="leading">Interlínea</label><span class="v" id="leadingV">2</span></div>
+        <input type="range" id="leading" min="-3" max="8" step="1" value="2">
+      </div>
+    </div>
+
+    <div class="grp">
+      <h2>Punto</h2>
+      <div class="f">
+        <div class="hd"><label>Forma</label></div>
+        <div class="chips" id="shapeChips">
+          <button class="chip" type="button" data-s="circle" aria-pressed="true"><svg width="11" height="11" viewBox="0 0 11 11"><circle cx="5.5" cy="5.5" r="4.5" fill="currentColor"/></svg>Círculo</button>
+          <button class="chip" type="button" data-s="square"><svg width="11" height="11" viewBox="0 0 11 11"><rect x="1" y="1" width="9" height="9" fill="currentColor"/></svg>Cuadro</button>
+          <button class="chip" type="button" data-s="diamond"><svg width="11" height="11" viewBox="0 0 11 11"><path d="M5.5 .8 10.2 5.5 5.5 10.2.8 5.5Z" fill="currentColor"/></svg>Rombo</button>
+          <button class="chip" type="button" data-s="ring"><svg width="11" height="11" viewBox="0 0 11 11"><circle cx="5.5" cy="5.5" r="3.9" fill="none" stroke="currentColor" stroke-width="2.1"/></svg>Anillo</button>
+          <button class="chip" type="button" data-s="cross"><svg width="11" height="11" viewBox="0 0 11 11"><path d="M4.2 1h2.6v3.2H10v2.6H6.8V10H4.2V6.8H1V4.2h3.2Z" fill="currentColor"/></svg>Cruz</button>
+          <button class="chip" type="button" data-s="round"><svg width="11" height="11" viewBox="0 0 11 11"><rect x="1" y="1" width="9" height="9" rx="3" fill="currentColor"/></svg>Blando</button>
+        </div>
+      </div>
+      <div class="f">
+        <div class="hd"><label for="dot">Tamaño base</label><span class="v" id="dotV">0.34</span></div>
+        <input type="range" id="dot" min="0.05" max="1.6" step="0.01" value="0.34">
+      </div>
+      <div class="f">
+        <div class="hd"><label for="variation">Variación</label><span class="v" id="variationV">2.4×</span></div>
+        <input type="range" id="variation" min="1" max="7" step="0.1" value="2.4">
+      </div>
+      <div class="f">
+        <div class="hd"><label for="stagger">Fila alterna</label><span class="v" id="staggerV">0%</span></div>
+        <input type="range" id="stagger" min="0" max="100" step="5" value="0">
+        <p class="tip">Desplaza las filas impares: rompe la lectura de bordado</p>
+      </div>
+      <div class="f">
+        <div class="hd"><label for="outline">Contorno</label><span class="v" id="outlineV">0.00</span></div>
+        <input type="range" id="outline" min="0" max="0.5" step="0.01" value="0">
+        <p class="tip">Traza cada punto antes de rellenarlo: aparece el borde de la unión y los rombos entre puntos</p>
+      </div>
+      <div class="f">
+        <div class="hd"><label for="reach">Alcance del cursor</label><span class="v" id="reachV">190</span></div>
+        <input type="range" id="reach" min="0" max="600" step="10" value="190">
+      </div>
+    </div>
+
+    <div class="grp">
+      <h2>Movimiento</h2>
+      <div class="f">
+        <div class="hd"><label for="anim">Animación</label></div>
+        <select id="anim">
+          <option value="none">Ninguna</option>
+          <option value="press" selected>Punto de presión</option>
+          <option value="ripple">Onda al click</option>
+          <option value="breathe">Respiración</option>
+          <option value="scan">Barrido</option>
+          <option value="pour">Cascada</option>
+          <option value="drift">Ruido</option>
+        </select>
+      </div>
+      <div class="f">
+        <div class="hd"><label for="speed">Velocidad</label><span class="v" id="speedV">1.00×</span></div>
+        <input type="range" id="speed" min="0.1" max="3" step="0.05" value="1">
+      </div>
+      <div class="f">
+        <div class="hd"><label for="amount">Intensidad</label><span class="v" id="amountV">1.00</span></div>
+        <input type="range" id="amount" min="0" max="2.5" step="0.05" value="1">
+      </div>
+      <p class="tip" id="animTip">Mantené apretado: la presión sube; al soltar, se desvanece.</p>
+    </div>
+
+    <div class="grp">
+      <h2>Lienzo</h2>
+      <div class="f swatches">
+        <div class="sw"><span>Punto</span><input type="color" id="fg" value="#111110"></div>
+        <div class="sw"><span>Contorno</span><input type="color" id="stroke" value="#D93A16"></div>
+        <div class="sw"><span>Fondo</span><input type="color" id="bg" value="#EDEDE9"></div>
+      </div>
+      <div class="f">
+        <div class="hd"><label for="ratio">Formato</label></div>
+        <select id="ratio">
+          <option value="1.7778" selected>16 : 9</option>
+          <option value="1.6">16 : 10</option>
+          <option value="1">1 : 1</option>
+          <option value="0.8">4 : 5</option>
+          <option value="0.5625">9 : 16</option>
+        </select>
+      </div>
+    </div>
+
+  </aside>
+
+  <main>
+    <div class="stage">
+      <div class="board"></div>
+
+      <dialog id="codeDlg">
+        <div class="dh">
+          <b>Exportar código</b>
+          <div class="seg" id="codeTabs">
+            <button type="button" data-t="html" aria-pressed="true">Embed HTML</button>
+            <button type="button" data-t="framer">Framer</button>
+          </div>
+          <button class="btn quiet" id="codeClose">Cerrar</button>
+        </div>
+        <p class="dn" id="codeNote"></p>
+        <textarea id="codeOut" readonly spellcheck="false"></textarea>
+        <div class="df">
+          <span class="tag" id="codeSize"></span>
+          <button class="btn quiet" id="codeDownload">Descargar</button>
+          <button class="btn solid" id="codeCopy">Copiar</button>
+        </div>
+      </dialog>
+
+      <div class="capture" id="capture" hidden>
+        <span class="tag">Momento congelado</span>
+        <button class="btn solid" id="saveSvg">Guardar SVG</button>
+        <button class="btn quiet" id="savePng">PNG</button>
+        <button class="btn quiet" id="resume">Continuar</button>
+      </div>
+    </div>
+
+    <div class="status">
+      <span id="stDots">—</span><i class="dot"></i>
+      <span id="stGrid">—</span><i class="dot"></i>
+      <span id="stSize">—</span>
+      <span style="margin-left:auto" id="stHint">Mantené apretado sobre el lienzo</span>
+    </div>
+  </main>
+</div>
+
+<script type="text/plain" id="engineSrc">
+function mountDotGrid(el, CFG, G){
+  var cv = document.createElement('canvas');
+  cv.style.cssText = 'display:block;width:100%;height:100%;touch-action:none';
+  el.appendChild(cv);
+  var ctx = cv.getContext('2d');
+  var dots = [], W = 0, H = 0, cellPx = 10, cols = 0, rows = 0, raf = 0, frozen = false;
+  var ptr = {x:-1e5, y:-1e5, on:false, held:false};
+  var press = {x:0, y:0, v:0};
+  var waves = [], last = 0;
+
+  function set(k){ return G[k] || G['FALLBACK']; }
+  /* un glifo es una matriz (array de strings) o un objeto {w, m|p, d} con trazos */
+  function spec(ch){
+    var v = set(ch);
+    return (v && typeof v[0] === 'string') ? {w:v[0].length, m:v} : v;
+  }
+  function dims(){
+    var any = spec('A') || spec('FALLBACK');
+    return {w: any.w, h: any.m ? any.m.length : (G.__rows || 7)};
+  }
+  function morph(m, n){
+    var h = m.length, w = m[0].length, i, r, c, out = m;
+    for(i=0;i<Math.abs(n);i++){
+      var nx = [];
+      for(r=0;r<h;r++){
+        nx.push([]);
+        for(c=0;c<w;c++){
+          var sq = out[r][c];
+          var up = r>0 ? out[r-1][c] : false, dn = r<h-1 ? out[r+1][c] : false;
+          var lf = c>0 ? out[r][c-1] : false, rt = c<w-1 ? out[r][c+1] : false;
+          nx[r].push(n > 0 ? (sq||up||dn||lf||rt) : (sq&&up&&dn&&lf&&rt));
+        }
+      }
+      out = nx;
+    }
+    return out;
+  }
+  /* puntos de un glifo, en unidades de retícula */
+  function glyphPts(ch){
+    var sp = spec(ch), d = CFG.density, pts = [], i, k, r, c;
+    if(sp.m){
+      var m = [], row;
+      for(r=0;r<sp.m.length;r++){
+        row = [];
+        for(c=0;c<sp.m[r].length;c++) row.push(sp.m[r].charAt(c) === '#');
+        m.push(row);
+      }
+      if(CFG.weight) m = morph(m, CFG.weight);
+      for(r=0;r<m.length*d;r++) for(c=0;c<m[0].length*d;c++)
+        if(m[Math.floor(r/d)][Math.floor(c/d)]) pts.push([c, r]);
+      return {pts:pts, w:m[0].length*d, h:m.length*d};
+    }
+    function push(x,y){
+      for(var z=0;z<pts.length;z++){
+        var ax = pts[z][0]-x, ay = pts[z][1]-y;
+        if(ax*ax+ay*ay < 0.25) return;      /* z propio: no pisar el bucle de afuera */
+      }
+      pts.push([x,y]);
+    }
+    var P = sp.p || [];
+    for(k=0;k<P.length;k++){
+      var poly = P[k];
+      for(var j=0;j<poly.length-1;j++){
+        var a = poly[j], b = poly[j+1];
+        var dx = (b[0]-a[0])*d, dy = (b[1]-a[1])*d, len = Math.sqrt(dx*dx+dy*dy);
+        var n = Math.max(1, Math.round(len));
+        for(i=0;i<=n;i++) push(a[0]*d+dx*i/n, a[1]*d+dy*i/n);
+      }
+    }
+    var D = sp.d || [];
+    for(k=0;k<D.length;k++) push(D[k][0]*d, D[k][1]*d);
+    return {pts:pts, w:sp.w*d, h:(G.__rows||7)*d};
+  }
+  function words(){
+    return String(CFG.text).toUpperCase().split(/[\n\/]/)
+      .map(function(s){ return s.trim(); }).filter(function(s){ return s.length; });
+  }
+  function block(word){
+    var cut = CFG.tracking < 0 ? -CFG.tracking : 0;
+    var gap = CFG.tracking > 0 ? CFG.tracking : 0;
+    var pts = [], x = 0, i, j;
+    for(i=0;i<word.length;i++){
+      var g = glyphPts(word.charAt(i)), last = (i === word.length-1);
+      var keep = last ? g.w : Math.max(1, g.w-cut);
+      for(j=0;j<g.pts.length;j++){
+        var q = g.pts[j];
+        if(q[0] > keep-1+0.001) continue;
+        pts.push([x+q[0], q[1]]);
+      }
+      x += keep + (last ? 0 : gap);
+    }
+    return {pts:pts, w:x, h:dims().h*CFG.density};
+  }
+  function build(){
+    var lines = words().map(block), lead = CFG.leading;
+    cols = 1; rows = 0;
+    lines.forEach(function(b){ if(b.w > cols) cols = b.w; });
+    lines.forEach(function(b, i){ rows += b.h + (i ? lead : 0); });
+    var fit = Math.min(W/(cols+2), H/(rows+2));
+    cellPx = Math.max(0.8, fit*CFG.cellScale);
+    var st = (CFG.stagger||0)/100*cellPx*0.5, cur = 0;
+    var ox = (W-(cols-1)*cellPx)/2, oy = (H-(rows-1)*cellPx)/2;
+    dots = [];
+    lines.forEach(function(b){
+      var off = (cols-b.w)/2;
+      b.pts.forEach(function(q){
+        var gx = off+q[0], gy = cur+q[1];
+        var shift = (Math.round(gy) % 2) ? st : 0;
+        dots.push({x:ox+gx*cellPx+shift, y:oy+gy*cellPx,
+                   gx:gx, gy:gy, r:0, v:0, seed:Math.random()*6.283});
+      });
+      cur += b.h + lead;
+    });
+  }
+  function resize(){
+    W = el.clientWidth; H = el.clientHeight;
+    if(!W || !H) return;
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    cv.width = Math.round(W*dpr); cv.height = Math.round(H*dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    build();
+  }
+  function target(d, now){
+    var base = CFG.dot*cellPx, va = CFG.variation, t = base, i;
+    if(CFG.reach > 0 && ptr.on){
+      var di = Math.sqrt((d.x-ptr.x)*(d.x-ptr.x)+(d.y-ptr.y)*(d.y-ptr.y));
+      if(di < CFG.reach){ var k = 1-di/CFG.reach; t += base*(va-1)*k*k; }
+    }
+    var am = CFG.amount, ph = now/1000*CFG.speed, m = CFG.anim;
+    if(am > 0){
+      if(m === 'press' && press.v > 0.001){
+        var pr = Math.sqrt((d.x-press.x)*(d.x-press.x)+(d.y-press.y)*(d.y-press.y));
+        var rad = cellPx*7 + cellPx*16*press.v;
+        if(pr < rad){ var kp = 1-pr/rad; t += base*(va-1)*am*1.6*press.v*kp*kp; }
+      } else if(m === 'breathe'){
+        t += base*(va-1)*am*0.5*(0.5+0.5*Math.sin(ph*2 - d.gy*0.25));
+      } else if(m === 'scan'){
+        var sp = cols+14, f = (ph*9)%sp, o = Math.abs(d.gx-f+7);
+        if(o < 7){ var k2 = 1-o/7; t += base*(va-1)*am*k2*k2; }
+      } else if(m === 'drift'){
+        t += base*(va-1)*am*0.45*(0.5+0.5*Math.sin(ph*1.7 + d.seed*3));
+      } else if(m === 'pour'){
+        var sp2 = rows+16, f2 = (ph*7)%sp2, o2 = Math.abs(d.gy-f2+8);
+        if(o2 < 8){ var k3 = 1-o2/8; t += base*(va-1)*am*k3*k3; }
+      }
+      for(i=0;i<waves.length;i++){
+        var age = (now-waves[i].t)*CFG.speed, fr = age/1000*620;
+        var dx = d.x-waves[i].x, dy = d.y-waves[i].y;
+        var od = Math.abs(Math.sqrt(dx*dx+dy*dy) - fr);
+        if(od < 70){ var kk = 1-od/70; t += base*(va-1)*am*1.5*kk*kk*Math.max(0,1-age/1500); }
+      }
+    }
+    return t;
+  }
+  function shape(g, x, y, r){
+    var s = CFG.shape;
+    if(s === 'square'){ g.rect(x-r, y-r, r*2, r*2); }
+    else if(s === 'diamond'){ g.moveTo(x, y-r); g.lineTo(x+r, y); g.lineTo(x, y+r); g.lineTo(x-r, y); g.closePath(); }
+    else if(s === 'cross'){ var a = r*0.42; g.rect(x-a, y-r, a*2, r*2); g.rect(x-r, y-a, r*2, a*2); }
+    else if(s === 'round'){ var rr = Math.min(r, r*0.45);
+      if(g.roundRect) g.roundRect(x-r, y-r, r*2, r*2, rr); else g.rect(x-r, y-r, r*2, r*2); }
+    else if(s === 'ring'){
+      g.moveTo(x+r, y); g.arc(x, y, r, 0, Math.PI*2);
+      var ir = Math.max(0.1, r*0.52);
+      g.moveTo(x+ir, y); g.arc(x, y, ir, 0, Math.PI*2, true);
+    }
+    else { g.moveTo(x+r, y); g.arc(x, y, r, 0, Math.PI*2); }
+  }
+  function trace(g, sc){
+    g.beginPath();
+    for(var j=0;j<dots.length;j++){
+      var d = dots[j], r = Math.max(0.15, d.r)*sc;
+      shape(g, d.x*sc, d.y*sc, r);
+    }
+  }
+  function render(g, sc){
+    g.fillStyle = CFG.bg; g.fillRect(0,0,W*sc,H*sc);
+    var ol = CFG.outline || 0;
+    if(ol > 0){
+      trace(g, sc);
+      g.strokeStyle = CFG.stroke || '#000000';
+      g.lineWidth = ol*cellPx*sc;
+      g.lineJoin = 'round'; g.lineCap = 'round';
+      g.stroke();
+    }
+    trace(g, sc);
+    g.fillStyle = CFG.fg;
+    g.fill(CFG.shape === 'ring' ? 'evenodd' : 'nonzero');
+  }
+  function frame(now){
+    var dt = last ? Math.min(64, now-last) : 16; last = now;
+    if(!frozen){
+      if(CFG.anim === 'press'){
+        if(ptr.held){ press.x = ptr.x; press.y = ptr.y; press.v = Math.min(1, press.v + dt/620*CFG.speed); }
+        else press.v = Math.max(0, press.v - dt/1150*CFG.speed);
+      } else press.v = 0;
+      for(var i=waves.length-1;i>=0;i--) if(now-waves[i].t > 1800) waves.splice(i,1);
+      for(var j=0;j<dots.length;j++){
+        var d = dots[j], t = target(d, now);
+        d.v = (d.v + (t-d.r)*0.24)*0.7; d.r += d.v;
+      }
+    }
+    render(ctx, 1);
+    raf = requestAnimationFrame(frame);
+  }
+  function pos(e){ var b = cv.getBoundingClientRect(); ptr.x = e.clientX-b.left; ptr.y = e.clientY-b.top; ptr.on = true; }
+  function up(){ ptr.held = false; }
+  cv.addEventListener('pointermove', pos);
+  cv.addEventListener('pointerleave', function(){ ptr.on = false; ptr.x = ptr.y = -1e5; });
+  cv.addEventListener('pointerdown', function(e){
+    pos(e); ptr.held = true;
+    if(CFG.anim === 'ripple'){ waves.push({x:ptr.x, y:ptr.y, t:performance.now()}); if(waves.length>7) waves.shift(); }
+  });
+  window.addEventListener('pointerup', up);
+  var ro = new ResizeObserver(resize); ro.observe(el);
+  resize(); raf = requestAnimationFrame(frame);
+
+  return {
+    destroy: function(){ cancelAnimationFrame(raf); ro.disconnect(); window.removeEventListener('pointerup', up); if(cv.parentNode) cv.parentNode.removeChild(cv); },
+    update: function(next){ for(var k in next) CFG[k] = next[k]; build(); },
+    setGlyphs: function(g){ G = g; build(); },
+    freeze: function(v){ frozen = v; },
+    dots: function(){ return dots; },
+    size: function(){ return {w:W, h:H}; },
+    grid: function(){ return {cols:cols, rows:rows, cell:cellPx}; },
+    render: render,
+    config: CFG
+  };
+}
+</script>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------- matrices ---------- */
+const STD = {
+  A:[" ### ","#   #","#   #","#####","#   #","#   #","#   #"],
+  B:["#### ","#   #","#   #","#### ","#   #","#   #","#### "],
+  C:[" ### ","#   #","#    ","#    ","#    ","#   #"," ### "],
+  D:["#### ","#   #","#   #","#   #","#   #","#   #","#### "],
+  E:["#####","#    ","#    ","#### ","#    ","#    ","#####"],
+  F:["#####","#    ","#    ","#### ","#    ","#    ","#    "],
+  G:[" ### ","#   #","#    ","# ###","#   #","#   #"," ### "],
+  H:["#   #","#   #","#   #","#####","#   #","#   #","#   #"],
+  I:["#####","  #  ","  #  ","  #  ","  #  ","  #  ","#####"],
+  J:["#####","   # ","   # ","   # ","   # ","#  # "," ##  "],
+  K:["#   #","#  # ","# #  ","##   ","# #  ","#  # ","#   #"],
+  L:["#    ","#    ","#    ","#    ","#    ","#    ","#####"],
+  M:["#   #", "## ##", "# # #", "#   #", "#   #", "#   #", "#   #"],
+  N:["#   #", "##  #", "# # #", "#  ##", "#   #", "#   #", "#   #"],
+  O:[" ### ","#   #","#   #","#   #","#   #","#   #"," ### "],
+  P:["#### ","#   #","#   #","#### ","#    ","#    ","#    "],
+  Q:[" ### ", "#   #", "#   #", "#   #", "# # #", "#  # ", " ## #"],
+  R:["#### ","#   #","#   #","#### ","# #  ","#  # ","#   #"],
+  S:[" ####", "#    ", "#    ", " ### ", "    #", "    #", "#### "],
+  T:["#####","  #  ","  #  ","  #  ","  #  ","  #  ","  #  "],
+  U:["#   #","#   #","#   #","#   #","#   #","#   #"," ### "],
+  V:["#   #","#   #","#   #","#   #","#   #"," # # ","  #  "],
+  W:["#   #","#   #","#   #","#   #","# # #","## ##","#   #"],
+  X:["#   #","#   #"," # # ","  #  "," # # ","#   #","#   #"],
+  Y:["#   #","#   #"," # # ","  #  ","  #  ","  #  ","  #  "],
+  Z:["#####","    #","   # ","  #  "," #   ","#    ","#####"],
+  "0":[" ### ", "#  ##", "# # #", "# # #", "# # #", "##  #", " ### "],
+  "1":["  #  "," ##  ","  #  ","  #  ","  #  ","  #  "," ### "],
+  "2":[" ### ","#   #","    #","  ## "," #   ","#    ","#####"],
+  "3":["#####","   # ","  #  ","   # ","    #","#   #"," ### "],
+  "4":["   # ","  ## "," # # ","#  # ","#####","   # ","   # "],
+  "5":["#####","#    ","#### ","    #","    #","#   #"," ### "],
+  "6":["  ## "," #   ","#    ","#### ","#   #","#   #"," ### "],
+  "7":["#####","    #","   # ","  #  "," #   "," #   "," #   "],
+  "8":[" ### ","#   #","#   #"," ### ","#   #","#   #"," ### "],
+  "9":[" ### ","#   #","#   #"," ####","    #","   # "," ##  "],
+  ".":["     ","     ","     ","     ","     ","  ## ","  ## "],
+  ",":["     ","     ","     ","     ","  ## ","  ## "," #   "],
+  "-":["     ","     ","     "," ### ","     ","     ","     "],
+  "&":[" ##  ","#  # ","#  # "," ##  ","#  # ","#   #"," ### "],
+  " ":["     ","     ","     ","     ","     ","     ","     "],
+  FALLBACK:["     ","     ","     ","     ","     ","     ","     "]
+};
+
+const WIDE = {
+  A:["..###..",".#...#.","#.....#","#.....#","#######","#.....#","#.....#","#.....#","#.....#"],
+  B:["#####..","#....#.","#.....#","#....#.","#####..","#....#.","#.....#","#....#.","#####.."],
+  C:["..####.",".#....#","#......","#......","#......","#......","#......",".#....#","..####."],
+  D:["#####..","#....#.","#.....#","#.....#","#.....#","#.....#","#.....#","#....#.","#####.."],
+  E:["#######","#......","#......","#......","#####..","#......","#......","#......","#######"],
+  F:["#######","#......","#......","#......","#####..","#......","#......","#......","#......"],
+  G:["..####.",".#....#","#......","#......","#..####","#.....#","#.....#",".#....#","..####."],
+  H:["#.....#","#.....#","#.....#","#.....#","#######","#.....#","#.....#","#.....#","#.....#"],
+  I:["#######","...#...","...#...","...#...","...#...","...#...","...#...","...#...","#######"],
+  J:["#######","....#..","....#..","....#..","....#..","....#..","#...#..","#...#..",".###..."],
+  K:["#.....#", "#....#.", "#...#..", "#..#...", "###....", "#..#...", "#...#..", "#....#.", "#.....#"],
+  L:["#......","#......","#......","#......","#......","#......","#......","#......","#######"],
+  M:["#.....#","##...##","#.#.#.#","#..#..#","#.....#","#.....#","#.....#","#.....#","#.....#"],
+  N:["#.....#","##....#","#.#...#","#..#..#","#...#.#","#....##","#.....#","#.....#","#.....#"],
+  O:["..###..",".#...#.","#.....#","#.....#","#.....#","#.....#","#.....#",".#...#.","..###.."],
+  P:["#####..","#....#.","#.....#","#....#.","#####..","#......","#......","#......","#......"],
+  Q:["..###..",".#...#.","#.....#","#.....#","#.....#","#..#..#","#...#.#",".#...#.","..###.#"],
+  R:["#####..","#....#.","#.....#","#....#.","#####..","#..#...","#...#..","#....#.","#.....#"],
+  S:["..####.",".#....#","#......",".#.....","..###..",".....#.","......#","#....#.",".####.."],
+  T:["#######","...#...","...#...","...#...","...#...","...#...","...#...","...#...","...#..."],
+  U:["#.....#","#.....#","#.....#","#.....#","#.....#","#.....#","#.....#",".#...#.","..###.."],
+  V:["#.....#","#.....#","#.....#","#.....#",".#...#.",".#...#.","..#.#..","..#.#..","...#..."],
+  W:["#.....#","#.....#","#.....#","#.....#","#..#..#","#.#.#.#","##...##","#.....#","#.....#"],
+  X:["#.....#",".#...#.","..#.#..","...#...","...#...","...#...","..#.#..",".#...#.","#.....#"],
+  Y:["#.....#",".#...#.","..#.#..","...#...","...#...","...#...","...#...","...#...","...#..."],
+  Z:["#######","......#",".....#.","....#..","...#...","..#....",".#.....","#......","#######"],
+  "0":["..###..",".#...#.","#....##","#...#.#","#..#..#","#.#...#","##....#",".#...#.","..###.."],
+  "1":["...#...","..##...",".#.#...","...#...","...#...","...#...","...#...","...#...",".#####."],
+  "2":["..###..",".#...#.","#.....#","......#","....##.","..##...",".#.....","#......","#######"],
+  "3":["#######",".....#.","....#..","...##..",".....#.","......#","#.....#",".#...#.","..###.."],
+  "4":["....##.","...#.#.","..#..#.",".#...#.","#....#.","#######",".....#.",".....#.",".....#."],
+  "5":["#######","#......","#......","#####..",".....#.","......#","#.....#",".#...#.","..###.."],
+  "6":["..###..",".#...#.","#......","#......","#####..","#....#.","#.....#",".#...#.","..###.."],
+  "7":["#######","......#",".....#.","....#..","...#...","..#....","..#....","..#....","..#...."],
+  "8":["..###..",".#...#.","#.....#",".#...#.","..###..",".#...#.","#.....#",".#...#.","..###.."],
+  "9":["..###..",".#...#.","#.....#","#.....#","..####.","......#","......#",".#...#.","..###.."],
+  ".":[".......",".......",".......",".......",".......",".......",".......","..##...","..##..."],
+  ",":[".......",".......",".......",".......",".......",".......","..##...","..##...",".#....."],
+  "-":[".......",".......",".......",".......","..###..",".......",".......",".......","......."],
+  "&":["..##...",".#..#..",".#..#..","..##...",".#..#.#",".#...#.","#.....#","#....#.",".####.#"],
+  " ":[".......",".......",".......",".......",".......",".......",".......",".......","......."],
+  FALLBACK:[".......",".......",".......",".......",".......",".......",".......",".......","......."]
+};
+/* Alta 5x9 — condensada, esquinas cortadas, trazo de un punto */
+const TALL = {
+  A:["..#..",".#.#.","#...#","#...#","#####","#...#","#...#","#...#","#...#"],
+  B:["####.","#...#","#...#","#...#","####.","#...#","#...#","#...#","####."],
+  C:[".###.","#...#","#....","#....","#....","#....","#....","#...#",".###."],
+  D:["####.","#...#","#...#","#...#","#...#","#...#","#...#","#...#","####."],
+  E:["#####","#....","#....","#....","####.","#....","#....","#....","#####"],
+  F:["#####","#....","#....","#....","####.","#....","#....","#....","#...."],
+  G:[".###.","#...#","#....","#....","#.###","#...#","#...#","#...#",".###."],
+  H:["#...#","#...#","#...#","#...#","#####","#...#","#...#","#...#","#...#"],
+  I:["#####","..#..","..#..","..#..","..#..","..#..","..#..","..#..","#####"],
+  J:["....#","....#","....#","....#","....#","....#","#...#","#...#",".###."],
+  K:["#...#","#..#.","#.#..","#.#..","##...","#.#..","#.#..","#..#.","#...#"],
+  L:["#....","#....","#....","#....","#....","#....","#....","#....","#####"],
+  M:["#...#","##.##","#.#.#","#.#.#","#...#","#...#","#...#","#...#","#...#"],
+  N:["#...#","##..#","##..#","#.#.#","#.#.#","#.#.#","#..##","#..##","#...#"],
+  O:[".###.","#...#","#...#","#...#","#...#","#...#","#...#","#...#",".###."],
+  P:["####.","#...#","#...#","#...#","####.","#....","#....","#....","#...."],
+  Q:[".###.","#...#","#...#","#...#","#...#","#...#","#.#.#","#..#.",".##.#"],
+  R:["####.","#...#","#...#","#...#","####.","#.#..","#..#.","#..#.","#...#"],
+  S:[".###.","#...#","#....","#....",".###.","....#","....#","#...#",".###."],
+  T:["#####","..#..","..#..","..#..","..#..","..#..","..#..","..#..","..#.."],
+  U:["#...#","#...#","#...#","#...#","#...#","#...#","#...#","#...#",".###."],
+  V:["#...#","#...#","#...#","#...#","#...#","#...#",".#.#.",".#.#.","..#.."],
+  W:["#...#","#...#","#...#","#...#","#...#","#.#.#","#.#.#","##.##","#...#"],
+  X:["#...#","#...#",".#.#.",".#.#.","..#..",".#.#.",".#.#.","#...#","#...#"],
+  Y:["#...#","#...#",".#.#.",".#.#.","..#..","..#..","..#..","..#..","..#.."],
+  Z:["#####","....#","...#.","...#.","..#..",".#...",".#...","#....","#####"],
+  "0":[".###.","#...#","#..##","#.#.#","#.#.#","#.#.#","##..#","#...#",".###."],
+  "1":["..#..",".##..","#.#..","..#..","..#..","..#..","..#..","..#..","#####"],
+  "2":[".###.","#...#","....#","....#","...#.","..#..",".#...","#....","#####"],
+  "3":[".###.","#...#","....#","....#","..##.","....#","....#","#...#",".###."],
+  "4":["...#.","..##.",".#.#.","#..#.","#..#.","#####","...#.","...#.","...#."],
+  "5":["#####","#....","#....","####.","....#","....#","....#","#...#",".###."],
+  "6":["..##.",".#...","#....","#....","####.","#...#","#...#","#...#",".###."],
+  "7":["#####","....#","....#","...#.","...#.","..#..","..#..",".#...",".#..."],
+  "8":[".###.","#...#","#...#","#...#",".###.","#...#","#...#","#...#",".###."],
+  "9":[".###.","#...#","#...#","#...#",".####","....#","....#","...#.",".##.."],
+  ".":[".....",".....",".....",".....",".....",".....",".....",".##..",".##.."],
+  ",":[".....",".....",".....",".....",".....",".....",".##..",".##..","#...."],
+  "-":[".....",".....",".....",".....",".###.",".....",".....",".....","....."],
+  "&":[".##..","#..#.","#..#.",".##..",".#...","#.#.#","#..##","#...#",".####"],
+  " ":[".....",".....",".....",".....",".....",".....",".....",".....","....."],
+  FALLBACK:[".....",".....",".....",".....",".....",".....",".....",".....","....."]
+};
+/* Serif 10x11 — trazo de 2 puntos, remate de 4 (referencia TOKYO/KYOTO) */
+const SERIF = {
+  A:["....##....", "...####...", "..##..##..", ".##....##.", ".##....##.", ".########.", ".########.", ".##....##.", ".##....##.", "####..####", "####..####"],
+  B:["#########.", "##########", ".##.....##", ".##.....##", ".########.", ".########.", ".##.....##", ".##.....##", ".##.....##", "##########", "#########."],
+  C:["..######..", ".########.", "##......##", "##......##", "##........", "##........", "##........", "##......##", "##......##", ".########.", "..######.."],
+  D:["########..", "#########.", ".##.....##", ".##.....##", ".##.....##", ".##.....##", ".##.....##", ".##.....##", ".##.....##", "#########.", "########.."],
+  E:["##########", "##########", ".##.......", ".##.......", ".#######..", ".#######..", ".##.......", ".##.......", ".##.......", "##########", "##########"],
+  F:["##########", "##########", ".##.......", ".##.......", ".#######..", ".#######..", ".##.......", ".##.......", ".##.......", "####......", "####......"],
+  G:["..######..", ".########.", "##......##", "##........", "##........", "##...#####", "##...#####", "##......##", "##......##", ".########.", "..######.."],
+  H:["####..####", "####..####", ".##....##.", ".##....##.", ".########.", ".########.", ".##....##.", ".##....##.", ".##....##.", "####..####", "####..####"],
+  I:["##########", "##########", "....##....", "....##....", "....##....", "....##....", "....##....", "....##....", "....##....", "##########", "##########"],
+  J:["..########", "..########", "......##..", "......##..", "......##..", "......##..", "......##..", "##....##..", "##....##..", ".#######..", "..#####..."],
+  K:["####..####", "####..####", ".##...##..", ".##..##...", ".##.##....", ".#####....", ".##.##....", ".##..##...", ".##...##..", "####..####", "####..####"],
+  L:["####......", "####......", ".##.......", ".##.......", ".##.......", ".##.......", ".##.......", ".##.......", ".##.......", "##########", "##########"],
+  M:["####..####", "####..####", ".###..###.", ".###..###.", ".##.##.##.", ".##.##.##.", ".##.##.##.", ".##....##.", ".##....##.", "####..####", "####..####"],
+  N:["####..####", "####..####", ".###...##.", ".###...##.", ".####..##.", ".##.##.##.", ".##..####.", ".##...###.", ".##...###.", "####..####", "####..####"],
+  O:["..######..", ".########.", "##......##", "##......##", "##......##", "##......##", "##......##", "##......##", "##......##", ".########.", "..######.."],
+  P:["#########.", "##########", ".##.....##", ".##.....##", ".##.....##", ".#########", ".#########", ".##.......", ".##.......", "####......", "####......"],
+  Q:["..######..", ".########.", "##......##", "##......##", "##......##", "##......##", "##......##", "##......##", "##......##", ".########.", "..#####.##"],
+  R:["#########.", "##########", ".##.....##", ".##.....##", ".##.....##", ".#########", ".#########", ".##..##...", ".##...##..", "####..####", "####..####"],
+  S:["..######..", ".########.", "##......##", "##........", ".#######..", "..#######.", "........##", "........##", "##......##", ".########.", "..######.."],
+  T:["##########", "##########", "....##....", "....##....", "....##....", "....##....", "....##....", "....##....", "....##....", "...####...", "...####..."],
+  U:["####..####", "####..####", ".##....##.", ".##....##.", ".##....##.", ".##....##.", ".##....##.", ".##....##.", ".##....##.", ".########.", "..######.."],
+  V:["####..####", "####..####", ".##....##.", ".##....##.", ".##....##.", "..##..##..", "..##..##..", "...####...", "...####...", "....##....", "....##...."],
+  W:["####..####", "####..####", ".##....##.", ".##....##.", ".##.##.##.", ".##.##.##.", ".##.##.##.", ".##.##.##.", ".##.##.##.", ".########.", "..######.."],
+  X:["####..####", "####..####", ".##....##.", "..##..##..", "...####...", "....##....", "...####...", "..##..##..", ".##....##.", "####..####", "####..####"],
+  Y:["####..####", "####..####", ".##....##.", "..##..##..", "...####...", "....##....", "....##....", "....##....", "....##....", "...####...", "...####..."],
+  Z:["##########", "##########", "......##..", ".....##...", ".....##...", "....##....", "...##.....", "..##......", ".##.......", "##########", "##########"],
+  "0":["..######..", ".########.", "##....####", "##...##.##", "##..##..##", "##.##...##", "###.....##", "##......##", "##......##", ".########.", "..######.."],
+  "1":["...####...", "..#####...", ".##.##....", "....##....", "....##....", "....##....", "....##....", "....##....", "....##....", "..######..", "..######.."],
+  "2":["..######..", ".########.", "##......##", "........##", "......###.", "....###...", "..###.....", ".##.......", "##........", "##########", "##########"],
+  "3":["..######..", ".########.", "##......##", "........##", "....#####.", "....#####.", "........##", "........##", "##......##", ".########.", "..######.."],
+  "4":["......##..", ".....###..", "....####..", "...##.##..", "..##..##..", ".##...##..", "##########", "##########", "......##..", "....######", "....######"],
+  "5":["#########.", "#########.", "##........", "##........", "########..", ".########.", "........##", "........##", "##......##", ".########.", "..######.."],
+  "6":["...#####..", "..######..", ".##.......", "##........", "########..", ".########.", "##......##", "##......##", "##......##", ".########.", "..######.."],
+  "7":["##########", "##########", "......##..", ".....##...", "....##....", "....##....", "...##.....", "...##.....", "..##......", "..####....", "..####...."],
+  "8":["..######..", ".########.", "##......##", "##......##", ".########.", ".########.", "##......##", "##......##", "##......##", ".########.", "..######.."],
+  "9":["..######..", ".########.", "##......##", "##......##", "##......##", ".########.", "..######..", "........##", ".......##.", "..######..", "..#####..."],
+  ".":["..........", "..........", "..........", "..........", "..........", "..........", "..........", "..........", "..........", "..####....", "..####...."],
+  ",":["..........", "..........", "..........", "..........", "..........", "..........", "..........", "..........", "..####....", "..####....", "..##......"],
+  "-":["..........", "..........", "..........", "..........", "..######..", "..######..", "..........", "..........", "..........", "..........", ".........."],
+  "&":["..#####...", ".##...##..", ".##...##..", "..#####...", ".#####....", "##..##..##", "##...####.", "##....###.", ".#######.#", "..........", ".........."],
+  " ":["..........", "..........", "..........", "..........", "..........", "..........", "..........", "..........", "..........", "..........", ".........."],
+  FALLBACK:["..........", "..........", "..........", "..........", "..........", "..........", "..........", "..........", "..........", "..........", ".........."]
+};
+/* Logotipo — 7 filas. Ortogonales en retícula; diagonales como cadenas de puntos
+   a paso constante sobre el trazo (así está construida la referencia). */
+const LOGO = {
+  __rows: 7,
+  A:{"w":7,"p":[[[3,0],[0,6]],[[3,0],[6,6]],[[1.3,4.6],[4.7,4.6]]],"d":[[1,6],[5,6]]},
+  B:{"w":6,"m":["#####.","##...#","#....#","#####.","#....#","##...#","#####."]},
+  C:{"w":6,"m":[".####.","##..##","##....","##....","##....","##..##",".####."]},
+  D:{"w":6,"m":["#####.","##...#","#....#","#....#","#....#","##...#","#####."]},
+  E:{"w":5,"m":["#####","##...","#....","####.","#....","##...","#####"]},
+  F:{"w":5,"m":["#####","##...","#....","####.","#....","##...","##..."]},
+  G:{"w":6,"m":[".####.","##..##","##....","##.###","##...#","##..##",".####."]},
+  H:{"w":6,"m":["##..##","##..##",".#..#.",".####.",".#..#.","##..##","##..##"]},
+  I:{"w":5,"m":["#####","..#..","..#..","..#..","..#..","..#..","#####"]},
+  J:{"w":5,"m":["..###","...#.","...#.","...#.","#..#.","##.#.",".###."]},
+  K:{"w":6,"p":[[[1,0],[1,6]],[[1.5,3],[4.6,0.5]],[[1.5,3],[4.6,5.5]]],"d":[[0,0],[0,1],[0,5],[0,6],[5,0],[5,1],[5,5],[5,6]]},
+  L:{"w":5,"m":["##...","##...",".#...",".#...",".#...",".#...","#####"]},
+  M:{"w":8,"p":[[[1,0],[1,6]],[[6,0],[6,6]],[[1,0.6],[3.5,4]],[[6,0.6],[3.5,4]]],"d":[[0,0],[0,1],[0,5],[0,6],[7,0],[7,1],[7,5],[7,6]]},
+  N:{"w":7,"p":[[[1,0],[1,6]],[[5,0],[5,6]],[[1,0.6],[5,5.4]]],"d":[[0,0],[0,1],[0,5],[0,6],[6,0],[6,1],[6,5],[6,6]]},
+  O:{"w":6,"m":[".####.","#....#","##..##","##..##","##..##","#....#",".####."]},
+  P:{"w":6,"m":["#####.","##...#","#....#","#####.","#.....","##....","##...."]},
+  Q:{"w":6,"m":[".####.","#....#","##..##","##..##","##..##","#...##",".#####"]},
+  R:{"w":6,"m":["#####.","##...#","#....#","#####.","#..#..","#...#.","##..##"]},
+  S:{"w":6,"m":[".####.","#...##","#.....",".####.","....##","##...#",".####."]},
+  T:{"w":7,"m":["#######","##.#.##","...#...","...#...","...#...","..###..","..###.."]},
+  U:{"w":6,"m":["##..##","##..##",".#..#.",".#..#.",".#..#.",".#..#.",".####."]},
+  V:{"w":7,"p":[[[1,0.8],[3,6]],[[5,0.8],[3,6]]],"d":[[0,0],[1,0],[0,1],[5,0],[6,0],[6,1]]},
+  W:{"w":10,"p":[[[1,0.8],[2.8,6]],[[2.8,6],[4.5,2.4]],[[4.5,2.4],[6.2,6]],[[6.2,6],[8,0.8]]],"d":[[0,0],[1,0],[0,1],[7,0],[8,0],[9,0],[9,1]]},
+  X:{"w":7,"p":[[[1,0.8],[5,5.2]],[[5,0.8],[1,5.2]]],"d":[[0,0],[1,0],[0,1],[5,0],[6,0],[6,1],[0,5],[0,6],[1,6],[6,5],[5,6],[6,6]]},
+  Y:{"w":7,"p":[[[1,1],[3,3.6]],[[5,1],[3,3.6]],[[3,3.6],[3,6]]],"d":[[0,0],[1,0],[0,1],[5,0],[6,0],[6,1],[2,5],[4,5],[2,6],[4,6]]},
+  Z:{"w":6,"p":[[[0,0],[5,0]],[[5,0],[0,6]],[[0,6],[5,6]]],"d":[]},
+  "0":{"w":6,"m":[".####.","#...##","##..##","##..##","##..##","##...#",".####."]},
+  "1":{"w":5,"m":["..##.",".###.","..##.","..##.","..##.","..##.","#####"]},
+  "2":{"w":6,"m":[".####.","#....#","....##","..###.",".##...","#.....","######"]},
+  "3":{"w":6,"m":[".####.","#....#","....##","..###.","....##","#....#",".####."]},
+  "4":{"w":6,"m":["...##.","..###.",".#.##.","#..##.","######","...##.","...##."]},
+  "5":{"w":6,"m":["######","##....","####..","....##","....##","#...##",".####."]},
+  "6":{"w":6,"m":["..###.",".##...","#.....","#####.","##...#","#....#",".####."]},
+  "7":{"w":6,"m":["######","....##","...##.","..##..","..##..",".##...",".##..."]},
+  "8":{"w":6,"m":[".####.","#....#","#....#",".####.","#....#","#....#",".####."]},
+  "9":{"w":6,"m":[".####.","#....#","#....#",".#####","....#.","...##.",".###.."]},
+  ".":{"w":4,"m":["....","....","....","....","....",".##.",".##."]},
+  ",":{"w":4,"m":["....","....","....","....",".##.",".##.","##.."]},
+  "-":{"w":5,"m":[".....",".....",".....",".###.",".....",".....","....."]},
+  "&":{"w":7,"m":[".####..","#....#.","#....#.",".####..","#..#..#","#...##.",".####.#"]},
+  " ":{"w":3,"m":["...","...","...","...","...","...","..."]},
+  FALLBACK:{"w":3,"m":["...","...","...","...","...","...","..."]}
+};
+const FACES = {std:STD, wide:WIDE, tall:TALL, serif:SERIF, logo:LOGO};
+
+/* ---------- dom ---------- */
+const $ = id => document.getElementById(id);
+const stage = document.querySelector('.stage'), board = document.querySelector('.board');
+const cvHost = board;
+const ui = {};
+['text','face','weight','tracking','leading','dot','variation','stagger','reach','outline',
+ 'anim','speed','amount','fg','bg','stroke','ratio','exportScale'].forEach(k => ui[k] = $(k));
+const out = {};
+['density','weight','tracking','leading','dot','variation','stagger','reach','outline','speed','amount']
+  .forEach(k => out[k] = $(k+'V'));
+
+let density = 2, shape = 'circle', frozen = false;
+
+const ENGINE = $('engineSrc').textContent.trim();
+new Function(ENGINE + '\nwindow.mountDotGrid = mountDotGrid;')();
+
+function cfg(){
+  return {
+    text: ui.text.value,
+    density: density,
+    weight: parseInt(ui.weight.value,10),
+    tracking: parseInt(ui.tracking.value,10),
+    leading: parseInt(ui.leading.value,10),
+    cellScale: 1,
+    dot: parseFloat(ui.dot.value),
+    variation: parseFloat(ui.variation.value),
+    stagger: parseFloat(ui.stagger.value),
+    reach: parseFloat(ui.reach.value),
+    anim: ui.anim.value,
+    speed: parseFloat(ui.speed.value),
+    amount: parseFloat(ui.amount.value),
+    shape: shape,
+    outline: parseFloat(ui.outline.value),
+    stroke: ui.stroke.value,
+    fg: ui.fg.value,
+    bg: ui.bg.value
+  };
+}
+
+const grid = window.mountDotGrid(cvHost, cfg(), FACES[ui.face.value]);
+const cv = cvHost.querySelector('canvas');  /* la que monta el motor */
+
+function sync(){
+  grid.update(cfg());
+  const ds = grid.dots().length;
+  $('stDots').textContent = ds + ' puntos';
+  const s = grid.size(), g = grid.grid();
+  $('stGrid').textContent = g.cols + ' × ' + g.rows + ' retícula';
+  $('stSize').textContent = Math.round(s.w) + ' × ' + Math.round(s.h) + ' px';
+}
+function fitBoard(){
+  const ratio = parseFloat(ui.ratio.value);
+  const aw = stage.clientWidth - 56, ah = stage.clientHeight - 56;
+  let w = aw, h = w/ratio;
+  if(h > ah){ h = ah; w = h*ratio; }
+  board.style.width = Math.max(140, Math.round(w)) + 'px';
+  board.style.height = Math.max(140, Math.round(h)) + 'px';
+  setTimeout(sync, 0);
+}
+
+/* ---------- controles ---------- */
+function live(el, o, fmt){
+  const f = () => { if(o) o.textContent = fmt ? fmt(el.value) : el.value; sync(); };
+  el.addEventListener('input', f); f();
+}
+live(ui.weight, out.weight, v => (v>0?'+':'') + v);
+live(ui.tracking, out.tracking);
+live(ui.leading, out.leading);
+live(ui.dot, out.dot, v => parseFloat(v).toFixed(2));
+live(ui.variation, out.variation, v => parseFloat(v).toFixed(1)+'×');
+live(ui.stagger, out.stagger, v => v+'%');
+live(ui.reach, out.reach);
+live(ui.outline, out.outline, v => parseFloat(v).toFixed(2));
+live(ui.speed, out.speed, v => parseFloat(v).toFixed(2)+'×');
+live(ui.amount, out.amount, v => parseFloat(v).toFixed(2));
+ui.text.addEventListener('input', sync);
+ui.fg.addEventListener('input', sync);
+ui.bg.addEventListener('input', sync);
+ui.stroke.addEventListener('input', sync);
+ui.ratio.addEventListener('change', fitBoard);
+const PRESETS = {
+  std:  {dot:0.34, outline:0,    variation:2.4, tip:'Blocky, la base. Ajustes sugeridos: punto 0.34 · sin contorno.'},
+  wide: {dot:0.42, outline:0,    variation:2.4, tip:'Más ancha, con diagonales reales. Sugerido: punto 0.42 · sin contorno.'},
+  tall: {dot:0.38, outline:0,    variation:2.4, tip:'Condensada, esquinas cortadas. Sugerido: punto 0.38 · sin contorno.'},
+  serif:{dot:0.56, outline:0.11, variation:1,   tip:'Trazo de 2 puntos y remate de 4. Para el look de la referencia: punto 0.56 · contorno 0.11 · variación 1.'},
+  logo: {dot:0.70, outline:0.11, variation:1,   tip:'Ancho proporcional, trazo de 1 que engrosa a 2 en los remates. Medida de la referencia. Usar con densidad 1.'}
+};
+function faceTip(){ $('faceTip').textContent = (PRESETS[ui.face.value]||{}).tip || ''; }
+ui.face.addEventListener('change', () => { grid.setGlyphs(FACES[ui.face.value]); faceTip(); sync(); });
+$('facePreset').addEventListener('click', () => {
+  const pr = PRESETS[ui.face.value]; if(!pr) return;
+  [['dot',pr.dot],['outline',pr.outline],['variation',pr.variation]].forEach(([k,v]) => {
+    ui[k].value = v; ui[k].dispatchEvent(new Event('input', {bubbles:true}));
+  });
+});
+faceTip();
+
+const TIPS = {
+  press:'Mantené apretado: la presión sube; al soltar, se desvanece.',
+  ripple:'Cada click suelta una onda que viaja hacia afuera.',
+  breathe:'Pulso global con desfasaje por fila.',
+  scan:'Banda vertical recorriendo de izquierda a derecha.',
+  pour:'Banda horizontal cayendo de arriba hacia abajo.',
+  drift:'Cada punto oscila con su propia fase. Rompe la regularidad.',
+  none:'Sólo responde al cursor.'
+};
+ui.anim.addEventListener('change', () => {
+  $('animTip').textContent = TIPS[ui.anim.value] || '';
+  $('stHint').textContent = ui.anim.value === 'press'
+    ? 'Mantené apretado sobre el lienzo'
+    : (ui.anim.value === 'ripple' ? 'Click sobre el lienzo' : 'Mové el cursor sobre el lienzo');
+  sync();
+});
+
+$('densitySeg').addEventListener('click', e => {
+  const b = e.target.closest('button[data-v]'); if(!b) return;
+  density = parseInt(b.dataset.v,10);
+  [...e.currentTarget.children].forEach(x => x.setAttribute('aria-pressed', String(x===b)));
+  out.density.textContent = density; sync();
+});
+$('shapeChips').addEventListener('click', e => {
+  const b = e.target.closest('button[data-s]'); if(!b) return;
+  shape = b.dataset.s;
+  [...e.currentTarget.children].forEach(x => x.setAttribute('aria-pressed', String(x===b)));
+  sync();
+});
+
+/* ---------- congelar / guardar ---------- */
+function setFrozen(v){
+  frozen = v; grid.freeze(v);
+  $('capture').hidden = !v;
+  board.classList.toggle('frozen', v);
+  $('freeze').innerHTML = (v ? 'Continuar ' : 'Congelar ') + '<kbd>espacio</kbd>';
+}
+function download(blob, ext){
+  const url = URL.createObjectURL(blob), a = document.createElement('a');
+  a.href = url; a.download = 'dotgrid-' + Date.now() + '.' + ext;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1500);
+}
+function shapeSvg(x, y, r){
+  const f = n => n.toFixed(2);
+  if(shape === 'square') return '<rect x="'+f(x-r)+'" y="'+f(y-r)+'" width="'+f(r*2)+'" height="'+f(r*2)+'"/>';
+  if(shape === 'round')  return '<rect x="'+f(x-r)+'" y="'+f(y-r)+'" width="'+f(r*2)+'" height="'+f(r*2)+'" rx="'+f(r*0.45)+'"/>';
+  if(shape === 'diamond')return '<path d="M'+f(x)+' '+f(y-r)+'L'+f(x+r)+' '+f(y)+'L'+f(x)+' '+f(y+r)+'L'+f(x-r)+' '+f(y)+'Z"/>';
+  if(shape === 'cross'){ const a = r*0.42;
+    return '<path d="M'+f(x-a)+' '+f(y-r)+'h'+f(a*2)+'v'+f(r-a)+'h'+f(r-a)+'v'+f(a*2)+'h'+f(-(r-a))+'v'+f(r-a)+'h'+f(-a*2)+'v'+f(-(r-a))+'h'+f(-(r-a))+'v'+f(-a*2)+'h'+f(r-a)+'Z"/>'; }
+  if(shape === 'ring')   return '<circle cx="'+f(x)+'" cy="'+f(y)+'" r="'+f(r*0.76)+'" fill="none" stroke-width="'+f(r*0.48)+'"/>';
+  return '<circle cx="'+f(x)+'" cy="'+f(y)+'" r="'+f(r)+'"/>';
+}
+/* contorno real del punto, para la pasada de trazo */
+function outlineSvg(x, y, r){
+  const f = n => n.toFixed(2);
+  if(shape === 'ring')
+    return '<circle cx="'+f(x)+'" cy="'+f(y)+'" r="'+f(r)+'"/>'
+         + '<circle cx="'+f(x)+'" cy="'+f(y)+'" r="'+f(Math.max(0.1, r*0.52))+'"/>';
+  return shapeSvg(x, y, r);
+}
+function svgString(){
+  const s = grid.size(), W = Math.round(s.w), H = Math.round(s.h), p = [];
+  const dots = grid.dots(), ol = parseFloat(ui.outline.value);
+  const cell = grid.grid().cell;
+  p.push('<svg xmlns="http://www.w3.org/2000/svg" width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'">');
+  p.push('<rect width="'+W+'" height="'+H+'" fill="'+ui.bg.value+'"/>');
+  if(ol > 0){
+    p.push('<g fill="none" stroke="'+ui.stroke.value+'" stroke-width="'+(ol*cell).toFixed(2)
+         + '" stroke-linejoin="round" stroke-linecap="round">');
+    dots.forEach(d => p.push(outlineSvg(d.x, d.y, Math.max(0.15, d.r))));
+    p.push('</g>');
+  }
+  p.push(shape === 'ring' ? '<g fill="none" stroke="'+ui.fg.value+'">' : '<g fill="'+ui.fg.value+'">');
+  dots.forEach(d => p.push(shapeSvg(d.x, d.y, Math.max(0.15, d.r))));
+  p.push('</g></svg>');
+  return p.join('\n');
+}
+function exportPng(){
+  const sc = parseInt(ui.exportScale.value,10), s = grid.size();
+  const off = document.createElement('canvas');
+  off.width = Math.round(s.w*sc); off.height = Math.round(s.h*sc);
+  grid.render(off.getContext('2d'), sc);
+  off.toBlob(b => download(b, 'png'), 'image/png');
+}
+$('freeze').addEventListener('click', () => setFrozen(!frozen));
+$('resume').addEventListener('click', () => setFrozen(false));
+$('savePng').addEventListener('click', exportPng);
+$('export').addEventListener('click', exportPng);
+$('saveSvg').addEventListener('click', () => download(new Blob([svgString()], {type:'image/svg+xml'}), 'svg'));
+window.addEventListener('keydown', e => {
+  if(e.code === 'Space' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA'){
+    e.preventDefault(); setFrozen(!frozen);
+  }
+  if(e.key === 'Escape' && frozen) setFrozen(false);
+});
+
+/* ---------- código ---------- */
+const dlg = $('codeDlg'); let codeTab = 'html';
+function usedGlyphs(){
+  const face = FACES[ui.face.value];
+  const chars = new Set(ui.text.value.toUpperCase().replace(/[\n/]/g,'').split(''));
+  const o = {};
+  chars.forEach(ch => { if(face[ch]) o[ch] = face[ch]; });
+  o[' '] = face[' ']; o.FALLBACK = face.FALLBACK; o.A = o.A || face.A;
+  if(face.__rows) o.__rows = face.__rows;
+  return o;
+}
+function lit(obj, ind){
+  const pad = ' '.repeat(ind);
+  return '{\n' + Object.keys(obj).map(k =>
+    pad + JSON.stringify(k) + ': ' + JSON.stringify(obj[k])).join(',\n') + '\n' + ' '.repeat(ind-2) + '}';
+}
+function genHTML(){
+  const c = cfg(), ratio = parseFloat(ui.ratio.value);
+  return '<!-- Dot Grid · autónomo, sin librerías -->\n'
+    + '<div id="dotgrid" style="width:100%;aspect-ratio:' + ratio.toFixed(4) + ';"></div>\n\n'
+    + '<script>\n(function(){\n\n'
+    + 'var CFG = ' + lit(c, 4) + ';\n\n'
+    + 'var GLYPHS = ' + lit(usedGlyphs(), 4) + ';\n\n'
+    + ENGINE + '\n\n'
+    + 'mountDotGrid(document.getElementById("dotgrid"), CFG, GLYPHS);\n\n'
+    + '})();\n<\/script>';
+}
+function genFramer(){
+  const c = cfg();
+  const anims = ['none','press','ripple','breathe','scan','pour','drift'];
+  const shapes = ['circle','square','diamond','ring','cross','round'];
+  return '// Dot Grid · componente de código para Framer\n'
+    + '// Assets → Code → New Code File, y pegá todo esto.\n\n'
+    + 'import { useEffect, useRef } from "react"\n'
+    + 'import { addPropertyControls, ControlType } from "framer"\n\n'
+    + 'const GLYPHS = ' + lit(usedGlyphs(), 4) + '\n\n'
+    + ENGINE + '\n\n'
+    + '/**\n * @framerSupportedLayoutWidth any\n * @framerSupportedLayoutHeight any\n */\n'
+    + 'export default function DotGrid(props) {\n'
+    + '    const ref = useRef(null)\n'
+    + '    useEffect(() => {\n'
+    + '        if (!ref.current) return\n'
+    + '        const g = mountDotGrid(ref.current, { ...props, cellScale: 1 }, GLYPHS)\n'
+    + '        return () => g.destroy()\n'
+    + '    }, [JSON.stringify(props)])\n'
+    + '    return <div ref={ref} style={{ width: "100%", height: "100%" }} />\n'
+    + '}\n\n'
+    + 'DotGrid.defaultProps = ' + lit(c, 4) + '\n\n'
+    + 'addPropertyControls(DotGrid, {\n'
+    + '    text: { type: ControlType.String, title: "Texto", defaultValue: ' + JSON.stringify(c.text) + ' },\n'
+    + '    density: { type: ControlType.Number, title: "Densidad", min: 1, max: 4, step: 1, defaultValue: ' + c.density + ' },\n'
+    + '    weight: { type: ControlType.Number, title: "Peso", min: -1, max: 2, step: 1, defaultValue: ' + c.weight + ' },\n'
+    + '    tracking: { type: ControlType.Number, title: "Interletra", min: -3, max: 6, step: 1, defaultValue: ' + c.tracking + ' },\n'
+    + '    leading: { type: ControlType.Number, title: "Interlínea", min: -3, max: 8, step: 1, defaultValue: ' + c.leading + ' },\n'
+    + '    shape: { type: ControlType.Enum, title: "Forma", options: ' + JSON.stringify(shapes) + ', defaultValue: ' + JSON.stringify(c.shape) + ' },\n'
+    + '    dot: { type: ControlType.Number, title: "Punto", min: 0.05, max: 1.6, step: 0.01, defaultValue: ' + c.dot + ' },\n'
+    + '    variation: { type: ControlType.Number, title: "Variación", min: 1, max: 7, step: 0.1, defaultValue: ' + c.variation + ' },\n'
+    + '    stagger: { type: ControlType.Number, title: "Fila alterna", min: 0, max: 100, step: 5, defaultValue: ' + c.stagger + ' },\n'
+    + '    reach: { type: ControlType.Number, title: "Alcance", min: 0, max: 600, step: 10, defaultValue: ' + c.reach + ' },\n'
+    + '    anim: { type: ControlType.Enum, title: "Animación", options: ' + JSON.stringify(anims) + ', defaultValue: ' + JSON.stringify(c.anim) + ' },\n'
+    + '    speed: { type: ControlType.Number, title: "Velocidad", min: 0.1, max: 3, step: 0.05, defaultValue: ' + c.speed + ' },\n'
+    + '    amount: { type: ControlType.Number, title: "Intensidad", min: 0, max: 2.5, step: 0.05, defaultValue: ' + c.amount + ' },\n'
+    + '    fg: { type: ControlType.Color, title: "Punto", defaultValue: ' + JSON.stringify(c.fg) + ' },\n'
+    + '    bg: { type: ControlType.Color, title: "Fondo", defaultValue: ' + JSON.stringify(c.bg) + ' }\n'
+    + '})\n';
+}
+function renderCode(){
+  const code = codeTab === 'html' ? genHTML() : genFramer();
+  $('codeOut').value = code;
+  $('codeSize').textContent = (code.length/1024).toFixed(1) + ' KB';
+  $('codeNote').textContent = codeTab === 'html'
+    ? 'Autónomo, sin librerías. Toma el ancho del contenedor y mantiene la proporción. Los valores viven en CFG, arriba de todo.'
+    : 'Componente con controles de propiedades: una vez pegado, ajustás todo desde el panel derecho de Framer.';
+}
+$('codeBtn').addEventListener('click', () => { renderCode(); dlg.showModal(); });
+$('codeClose').addEventListener('click', () => dlg.close());
+$('codeTabs').addEventListener('click', e => {
+  const b = e.target.closest('button[data-t]'); if(!b) return;
+  codeTab = b.dataset.t;
+  [...e.currentTarget.children].forEach(x => x.setAttribute('aria-pressed', String(x===b)));
+  renderCode();
+});
+$('codeCopy').addEventListener('click', async () => {
+  const b = $('codeCopy');
+  try { await navigator.clipboard.writeText($('codeOut').value); }
+  catch(_){ $('codeOut').select(); document.execCommand('copy'); }
+  b.textContent = 'Copiado'; setTimeout(() => b.textContent = 'Copiar', 1400);
+});
+$('codeDownload').addEventListener('click', () =>
+  download(new Blob([$('codeOut').value], {type:'text/plain'}), codeTab === 'html' ? 'html' : 'tsx'));
+
+new ResizeObserver(fitBoard).observe(stage);
+fitBoard();
+})();
+</script>
+</body>
+</html>
