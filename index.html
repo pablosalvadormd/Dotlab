@@ -530,7 +530,7 @@ function mountDotGrid(el, CFG, G){
       for(j=0;j<g.pts.length;j++){
         var q = g.pts[j];
         if(q[0] > lim + 0.001) continue;
-        pts.push([x+q[0], q[1]]);
+        pts.push([x+q[0], q[1], i]);
       }
       x += keep + (last ? 0 : gap);
     }
@@ -546,13 +546,13 @@ function mountDotGrid(el, CFG, G){
     var st = (CFG.stagger||0)/100*cellPx*0.5, cur = 0;
     var ox = (W-(cols-1)*cellPx)/2, oy = (H-(rows-1)*cellPx)/2;
     dots = [];
-    lines.forEach(function(b){
+    lines.forEach(function(b, li){
       var off = (cols-b.w)/2;
       b.pts.forEach(function(q){
         var gx = off+q[0], gy = cur+q[1];
         var shift = (Math.round(gy) % 2) ? st : 0;
         dots.push({x:ox+gx*cellPx+shift, y:oy+gy*cellPx,
-                   gx:gx, gy:gy, r:0, v:0, seed:Math.random()*6.283});
+                   gx:gx, gy:gy, ci:q[2], li:li, r:0, v:0, seed:Math.random()*6.283});
       });
       cur += b.h + lead;
     });
@@ -682,6 +682,7 @@ function mountDotGrid(el, CFG, G){
     dots: function(){ return dots; },
     size: function(){ return {w:W, h:H}; },
     grid: function(){ return {cols:cols, rows:rows, cell:cellPx}; },
+    words: words,
     render: render,
     config: CFG
   };
@@ -1195,27 +1196,45 @@ function outlineSvg(x, y, r){
   return shapeSvg(x, y, r);
 }
 function svgString(){
+  /* Cada punto sale como una figura cerrada en si misma, con su propia pintura:
+     se puede seleccionar y recolorear uno solo, sin desagrupar nada. Van
+     agrupados por letra, y el grupo no lleva pintura.
+     Si hay contorno en modo union, los anillos van en una capa propia debajo,
+     porque el lienzo dibuja todos los anillos y recien despues todos los
+     rellenos: con la pintura por figura no se puede reproducir ese orden. */
   const s = grid.size(), W = Math.round(s.w), H = Math.round(s.h), p = [];
   const dots = grid.dots(), ol = parseFloat(ui.outline.value);
-  const cell = grid.grid().cell;
+  const cell = grid.grid().cell, sw = (ol*cell).toFixed(2);
+  const words = grid.words ? grid.words() : [];
+  const esc = t => String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+  const put = (d, attrs) => shapeSvg(d.x, d.y, Math.max(0.15, d.r)).replace('/>', attrs+'/>');
   p.push('<svg xmlns="http://www.w3.org/2000/svg" width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'">');
   p.push('<rect width="'+W+'" height="'+H+'" fill="'+ui.bg.value+'"/>');
-  if(ol > 0 && olMode === 'each'){
-    p.push('<g fill="'+ui.fg.value+'" stroke="'+ui.stroke.value+'" stroke-width="'+(ol*cell).toFixed(2)
-         + '" stroke-linejoin="round" stroke-linecap="round">');
-    dots.forEach(d => p.push(shapeSvg(d.x, d.y, Math.max(0.15, d.r))));
-    p.push('</g></svg>');
-    return p.join('\n');
-  }
-  if(ol > 0){
-    p.push('<g fill="none" stroke="'+ui.stroke.value+'" stroke-width="'+(ol*cell).toFixed(2)
-         + '" stroke-linejoin="round" stroke-linecap="round">');
-    dots.forEach(d => p.push(outlineSvg(d.x, d.y, Math.max(0.15, d.r))));
+
+  if(ol > 0 && olMode !== 'each'){
+    const ring = ' fill="none" stroke="'+ui.stroke.value+'" stroke-width="'+sw+'" stroke-linejoin="round"';
+    p.push('<g data-layer="outline">');
+    dots.forEach(d => p.push(put(d, ring)));
     p.push('</g>');
   }
-  p.push(shape === 'ring' ? '<g fill="none" stroke="'+ui.fg.value+'">' : '<g fill="'+ui.fg.value+'">');
-  dots.forEach(d => p.push(shapeSvg(d.x, d.y, Math.max(0.15, d.r))));
-  p.push('</g></svg>');
+  const fillAttr = shape === 'ring'
+    ? ' fill="none" stroke="'+ui.fg.value+'" stroke-width="'+(cell*0.3).toFixed(2)+'"'
+    : ' fill="'+ui.fg.value+'"';
+  const eachAttr = ' fill="'+ui.fg.value+'" stroke="'+ui.stroke.value+'" stroke-width="'+sw+'" stroke-linejoin="round"';
+  const attrs = (ol > 0 && olMode === 'each') ? eachAttr : fillAttr;
+  let cur = null, open = false;
+  dots.forEach(d => {
+    const k = (d.li||0)+':'+(d.ci===undefined?0:d.ci);
+    if(k !== cur){
+      if(open) p.push('</g>');
+      const w = words[d.li||0] || '';
+      p.push('<g data-char="'+esc(w.charAt(d.ci===undefined?0:d.ci)||'')+'">');
+      cur = k; open = true;
+    }
+    p.push(put(d, attrs));
+  });
+  if(open) p.push('</g>');
+  p.push('</svg>');
   return p.join('\n');
 }
 function exportPng(){
